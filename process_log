@@ -5,14 +5,8 @@ echo processing video data from a vehicle log, please specify the path to the lo
 read video_path  
 
 # ask for the target parameters to decode 
-echo please specify the target parameters in quotes, separated by coammas 
+echo please specify the target parameters in quotes, separated by commas 
 read target_params 
-# echo $video_path
-
-# convert the video from .wmv to .avi if needed 
-if [ ${file: -4} != ".avi" ]
-	vlc -I dummy -vvv video_path
-	--sout=#transcode{vcodec=h264,vb=1024,acodec=mp4a,ab=192,channels=2,deinterlace}:standard{access=file,mux=ts,dst=video_path.avi}
 
 # next we will invoke ffmpeg, saving the images to a new file in the working directory 
 # this is where we are going to save it, with the output files nammed as "sample-%08d.png" 
@@ -26,3 +20,4 @@ ffmpeg -i $video_path $images_path
 
 # run the data through the python script 
 python recognize_data.py --directory output_images --targets target_params
+

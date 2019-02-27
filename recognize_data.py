@@ -27,8 +27,12 @@ captures = os.listdir(args["directory"])
 params = [param.strip() for param in args["labels"].split(',')]
 
 # construct the data structure 
-extracted_data = [[],[]]
+extracted_data = []
 
+# make sure we have enough bins to store the data 
+for param in params: 
+	empty_arr = []
+	extracted_data.append(empty_arr)
 
 # text recognition 
 def recognize_text(image_path):
@@ -46,6 +50,8 @@ def recognize_text(image_path):
 	text = pytesseract.image_to_string(Image.open(tmpfilename))
 	os.remove(tmpfilename)
 
+	print (text) 
+
 	return text 
 
 
@@ -53,6 +59,7 @@ def recognize_text(image_path):
 def extract_text(raw_text, parameter):
 	# split the lines into individual recognition outputs 
 	outputs = raw_text.splitlines()
+ 
 
 	# parse the outputs for the target parameter 
 	for output in outputs:
@@ -62,11 +69,11 @@ def extract_text(raw_text, parameter):
 			data_text = output.replace(parameter,'')
 
 			# strip everything but the data value 	
-			clean_text_arr = [chunk.strip() for chunk in data_text.split(' ')]
-			clean_text = clean_text_arr[1]
+			#clean_text_arr = [chunk.strip() for chunk in data_text.split(' ')]
+			#clean_text = clean_text_arr[1]
 
 			# there will never be "," in the data, only "."
-			clean_text = clean_text.replace(",",".")
+			clean_text = data_text.replace(",",".")
 
 			# remove any non-numerals, periods or dashes 
 			clean_text = filter_non_numerals(clean_text)
@@ -87,7 +94,7 @@ def populate_data():
 			# decode the text from each capture 
 			decoded_text = recognize_text(args["directory"] + "/" + capture)
 
-			# get the data from the decoded text for each target parameter and append it  
+			# get the data from the decoded text for each target parameter and append it  			
 			for param in params:
 				extracted_data[params.index(param)].append(extract_text(decoded_text, param))
 	return 
