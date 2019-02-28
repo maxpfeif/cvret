@@ -20,6 +20,14 @@ args = vars(ap.parse_args())
 # get the list of images 
 captures = os.listdir(args["directory"])
 
+# filter out any non-png files 
+for capture in captures: 
+	if not capture.endswith('.png'):
+		captures.remove(capture)
+
+captures.sort()		
+
+
 # construct the data structure 
 extracted_data = []
 
@@ -36,12 +44,16 @@ def recognize_text(image_path):
 	image = cv2.imread(image_path)
 	gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-#	cv2.imshow("gray", gray)
-#	cv2.waitKey(25)
+	gray = cv2.threshold(gray, 0, 255,
+		cv2.THRESH_BINARY | cv2.THRESH_OTSU)[1]
+
+	#cv2.imshow("gray", gray)
+	#cv2.waitKey(25)
 
 	# write the grayscale image to disk as a temporary file so we can
 	# apply OCR to it
-	tmpfilename = "{}.png".format(os.getpid())
+	# tmpfilename = "{}.png".format(os.getpid())	
+	tmpfilename = "TEMP.png"
 	cv2.imwrite(tmpfilename, gray)
 	
 	# load the image as a PIL/Pillow image, apply OCR, and then delete
@@ -49,7 +61,7 @@ def recognize_text(image_path):
 	text = pytesseract.image_to_string(Image.open(tmpfilename), config=config)
 	os.remove(tmpfilename)
  
-	print(text)
+	# print(text)
 
 	return text 
 
@@ -68,8 +80,8 @@ def extract_text(raw_text):
 def populate_data():
 	for capture in captures:
 		# display the status of the conversion 
-		# status = "Processing " + str(captures.index(capture)) + " of " +str(len(captures))
-		# print (status, end="\r")
+		status = "Processing " + str(captures.index(capture)) + " of " +str(len(captures))
+		print (status, end="\r")
 		
 		# make sure we are only processing .png images 
 		if capture.endswith('.png'):
